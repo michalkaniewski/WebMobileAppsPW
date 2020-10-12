@@ -15,9 +15,11 @@ def index():
         <p>Formularz</p>
         <form>
         	<ul>
-        		<li>Nazywam się: <input type="text"></input></li>
-        		<li>Mój e-mail: <input type="text"></input></li>
+        		<li id="name">Nazywam się: <input type="text" ></input></li>
+        		<li id="mail">Mój e-mail: <input type="text" ></input></li>
+        		<li><input type="submit" value="Zapisz się"></input></li>
         	</ul>
+        	
         </form>
     </body>"""
     
