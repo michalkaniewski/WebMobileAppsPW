@@ -14,8 +14,10 @@ def index():
         <h3>Witaj</h3>
         <p>Formularz</p>
         <form>
-        	<input type="text"></input>
-        	<input type="text"></input>
+        	<ul>
+        		<li>Nazywam się: <input type="text"></input></li>
+        		<li>Mój e-mail: <input type="text"></input></li>
+        	</ul>
         </form>
     </body>"""
     
