@@ -3,12 +3,17 @@ from flask import Flask, request
 app = Flask(__name__)
 supported_languages = ["pl", "cz", "es", "en-gb", "en"]
 
+@app.route('/check/<username>')
+def check(username):
+    if username == 'chaberb':
+        return {username: 'taken'}
+    return {username: 'available'}
 @app.route('/')
 def index():
     return """
     <!doctype html>
     <head>
-        <link rel="stylesheet" href="/static/main.css"></link>
+        <link rel="stylesheet" href="./static/main.css"></link>
     </head>
     <body>
         <h3>Witaj</h3>
@@ -24,4 +29,4 @@ def index():
     </body>"""
     
 if __name__ == '__main__':
-    app.run(threaded=True, port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
