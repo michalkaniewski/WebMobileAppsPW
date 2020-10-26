@@ -1,32 +1,15 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 supported_languages = ["pl", "cz", "es", "en-gb", "en"]
 
-@app.route('/check/<username>')
-def check(username):
-    if username == 'chaberb':
-        return {username: 'taken'}
-    return {username: 'available'}
+@app.route('/sender/sign-up')
+def register_form():
+    return render_template("register-form.html")
+
 @app.route('/')
 def index():
-    return """
-    <!doctype html>
-    <head>
-        <link rel="stylesheet" href="./static/main.css"></link>
-    </head>
-    <body>
-        <h3>Witaj</h3>
-        <p>Formularz</p>
-        <form>
-        	<ul>
-        		<li id="name">Nazywam się: <input type="text" ></input></li>
-        		<li id="mail">Mój e-mail: <input type="text" ></input></li>
-        		<li><input type="submit" value="Zapisz się"></input></li>
-        	</ul>
-        	
-        </form>
-    </body>"""
-    
+    return render_template("index.html")
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
