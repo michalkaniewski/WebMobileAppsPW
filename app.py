@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 
 app = Flask(__name__)
-supported_languages = ["pl", "cz", "es", "en-gb", "en"]
+supported_languages = ["pl"]
 
 @app.route('/sender/sign-up')
 def register_form():

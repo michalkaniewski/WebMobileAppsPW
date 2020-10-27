@@ -4,20 +4,26 @@
 <html>
     <head>
         <link rel="stylesheet" href="../static/main.css"></link>
+        <script type="text/javascript" src="../static/form-validation.js"></script>
     </head>
     <body>
         <h3>Rejestracja</h3>
-        <form method="POST"
+        <form id="register-form" method="POST"
             action="https://infinite-hamlet-29399.herokuapp.com/sender/register" enctype="multipart/form-data">
         	<ul>
-        		<li><input type="text" name="firstname" placeholder="Imię"/></li>
-                <li><input type="text" name="lastname" placeholder="Nazwisko"/></li>
-                <li><input type="text" name="login" placeholder="Nazwa użytkownika"/></li>
-                <li><input type="password" name="password" placeholder="Hasło"/></li>
-                <li><input type="password" name="repassword" placeholder="Powtórne hasło"/></li>
-                <li><input type="file" name="photo"/></li>
-                <li><input type="text" name="sex"/></li>
-        		<li><input type="submit" name="submit" value="Zarejestruj"/></li>
+        		<li><input id="firstname" type="text" name="firstname" placeholder="Imię" required/></li>
+                <li><input id="lastname" type="text" name="lastname" placeholder="Nazwisko" required/></li>
+                <li><input id="login" type="text" name="login" placeholder="Nazwa użytkownika" required/></li>
+                <li><input id="password" type="password" name="password" placeholder="Hasło" required/></li>
+                <li><input id="repassword" type="password" name="repassword" placeholder="Powtórne hasło" required/></li>
+                <li><input id="photo" type="file" name="photo"/></li>
+                <li>
+                    <select id="sex" name="sex" placeholder="Płeć">
+                        <option value="M">Mężczyzna</option>
+                        <option value="F">Kobieta</option>
+                    </select>
+                </li>
+        		<li><input id="submit" type="submit" name="submit" value="Zarejestruj"/></li>
         	</ul>
         	
         </form>
