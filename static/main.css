@@ -1,1 +1,27 @@
 form ul { list-style-type: none }
+form ul li {margin-top: 10px;}
+input {
+    width: 100%;
+    border-radius: 2px;
+}
+select {
+    width: 100%;
+    border-radius: 2px;
+}
+input#submit {
+    color: white;
+    background-color: green;
+}
+form#register-form {
+    width: 50%;
+    margin-left: 25%;
+}
+h3 {
+    text-align: center;
+}
+div#register-page {
+    background-color: lightblue;
+}
+body {
+    margin: 0 0 0 0;
+}

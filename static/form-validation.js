@@ -1,4 +1,5 @@
 function setUpEvents() {
+    const form = document.getElementById("register-form");
     const firstName = document.getElementById("firstname");
     const lastName = document.getElementById("lastname");
     const login = document.getElementById("login");
@@ -6,41 +7,35 @@ function setUpEvents() {
     const rePassword = document.getElementById("repassword");
     const photo = document.getElementById("photo");
     const submit = document.getElementById("submit");
-    firstName.addEventListener('change', (e) => validateField(e));
-    lastName.addEventListener('change', (e) => validateField(e));
-    login.addEventListener('change', (e) => validateField(e));
+    rePassword.disabled = true;
+    submit.disabled = true;
+    firstName.addEventListener('change', (e) => validateName(e));
+    lastName.addEventListener('change', (e) => validateName(e));
+    login.addEventListener('change', (e) => {
+        validateLogin(e, submit);
+    });
     password.addEventListener('change', (e) => validatePassword(e, password, rePassword));
     rePassword.addEventListener('change', (e) => validatePassword(e, password, rePassword));
     photo.addEventListener('change', (e) => validateField(e));
+    login.addEventListener('focus', () => {submit.disabled = true});
 }
 
-function validateField(e) {
-    switch (e.target.id) {
-        case "firstname":
-        case "lastname":
-            validateName(e.target.value);
-            break;
-        case "login":
-            validateLogin(e.target.value);
-            break;
-        default:
-            break;
-    }
-}
-
-function validateName(name) {
+function validateName(e) {
     const regex = /^[A-Z][a-z][a-z]*/; // FIXME: do poprawy regex
-    if (name.match(regex)) {
-        console.log("valid");
+    if (e.target.value.match(regex)) {
+        console.log(e.target.name, "valid");
     } else {
-        console.log("invalid");
+        e.target.value = "";
+        console.log(e.target.name, "invalid");
     }
 }
 
-function validateLogin(login) {
+function validateLogin(e, submit) {
+    const login = e.target.value;
     const regex = /^[a-z][a-z][a-z]*/; // FIXME: do poprawy regex
     if (!login.match(regex)) {
-        console.log("invalid");
+        e.target.value = "";
+        console.log("Login invalid");
         return;
     }
     let status;
@@ -49,21 +44,31 @@ function validateLogin(login) {
         status = response.status;
         var data = await response.json();
         if(status === 200 && data[login] === 'available') {
-            console.log("valid")
+            console.log("Login OK");
+            submit.disabled = false;
         } else {
-            console.log("invalid");
+            e.target.value = "";
+            submit.disabled = true;
+            console.log("login taken");
         }
     });
 }
 
 function validatePassword(e, password, rePassword) {
     if (e.target.id === "password") {
-        // TODO: regex
+        if (password.value.length >= 8) {
+            rePassword.disabled = false;
+        } else {
+            console.log("PASSWORD TOO SHORT")
+            rePassword.value = "";
+            rePassword.disabled = true;
+        }
     } else if (e.target.id === "repassword") {
         if (password.value === rePassword.value) {
-            console.log("re password valid");
+            console.log("PASSWORD OK")
         } else {
-            console.log("re password invalid");
+            rePassword.value = "";
+            console.log("PASSWORD MUST BE THE SAME");
         }
     }
 }
