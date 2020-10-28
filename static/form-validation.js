@@ -59,6 +59,7 @@ function validateLogin(e, submit) {
 function validatePassword(e, password, rePassword) {
     if (e.target.id === "password") {
         if (password.value.trim().length >= 8) {
+            e.target.classList.remove('incorrect');
             rePassword.disabled = false;
         } else {
             e.target.classList.add('incorrect');

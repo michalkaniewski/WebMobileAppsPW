@@ -103,3 +103,13 @@ footer span {
     text-align: center;
     font-size: 17px;
 }
+
+section.home-page h2 {
+    text-align: center;
+}
+
+section.home-page img {
+    margin-top: 10%;
+    margin-left: 35%;
+    width: 30%;
+}
