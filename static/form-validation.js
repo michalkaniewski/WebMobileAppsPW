@@ -1,3 +1,6 @@
+const PL = 'ĄĆĘŁŃÓŚŹŻ';
+const pl = 'ąćęłńóśźż';
+
 function setUpEvents() {
     const form = document.getElementById("register-form");
     const firstName = document.getElementById("firstname");
@@ -11,9 +14,7 @@ function setUpEvents() {
     submit.disabled = true;
     firstName.addEventListener('change', (e) => validateName(e));
     lastName.addEventListener('change', (e) => validateName(e));
-    login.addEventListener('change', (e) => {
-        validateLogin(e, submit);
-    });
+    login.addEventListener('change', (e) => validateLogin(e, submit));
     password.addEventListener('change', (e) => validatePassword(e, password, rePassword));
     rePassword.addEventListener('change', (e) => validatePassword(e, password, rePassword));
     photo.addEventListener('change', (e) => validateField(e));
@@ -21,54 +22,55 @@ function setUpEvents() {
 }
 
 function validateName(e) {
-    const regex = /^[A-Z][a-z][a-z]*/; // FIXME: do poprawy regex
+    const regex = new RegExp(`^[A-Z${PL}][a-z${pl}]+$`);
     if (e.target.value.match(regex)) {
-        console.log(e.target.name, "valid");
+        e.target.classList.remove('incorrect');
     } else {
         e.target.value = "";
-        console.log(e.target.name, "invalid");
+        e.target.classList.add('incorrect');
     }
 }
 
 function validateLogin(e, submit) {
+    let status;
     const login = e.target.value;
-    const regex = /^[a-z][a-z][a-z]*/; // FIXME: do poprawy regex
-    if (!login.match(regex)) {
+    const regex = /^[a-z]{3,12}$/;
+
+    if (login.match(regex)) {
+        fetch(`https://infinite-hamlet-29399.herokuapp.com/check/${login}`).then(async response => {
+            status = response.status;
+            var data = await response.json();
+            if(status === 200 && data[login] === 'available') {
+                e.target.classList.remove('incorrect');
+                submit.disabled = false;
+            } else {
+                e.target.value = "";
+                submit.disabled = true;
+                e.target.classList.add('incorrect');
+            }
+        });
+    } else {
         e.target.value = "";
-        console.log("Login invalid");
+        e.target.classList.add('incorrect');
         return;
     }
-    let status;
-    
-    fetch(`https://infinite-hamlet-29399.herokuapp.com/check/${login}`).then(async response => {
-        status = response.status;
-        var data = await response.json();
-        if(status === 200 && data[login] === 'available') {
-            console.log("Login OK");
-            submit.disabled = false;
-        } else {
-            e.target.value = "";
-            submit.disabled = true;
-            console.log("login taken");
-        }
-    });
 }
 
 function validatePassword(e, password, rePassword) {
     if (e.target.id === "password") {
-        if (password.value.length >= 8) {
+        if (password.value.trim().length >= 8) {
             rePassword.disabled = false;
         } else {
-            console.log("PASSWORD TOO SHORT")
+            e.target.classList.add('incorrect');
             rePassword.value = "";
             rePassword.disabled = true;
         }
     } else if (e.target.id === "repassword") {
         if (password.value === rePassword.value) {
-            console.log("PASSWORD OK")
+            e.target.classList.remove('incorrect');
         } else {
             rePassword.value = "";
-            console.log("PASSWORD MUST BE THE SAME");
+            e.target.classList.add('incorrect');
         }
     }
 }

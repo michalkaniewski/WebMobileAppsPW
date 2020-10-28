@@ -3,11 +3,10 @@
 {% block content %}
 <html>
     <head>
-        <link rel="stylesheet" href="../static/main.css"></link>
         <script type="text/javascript" src="../static/form-validation.js"></script>
     </head>
     <body>
-        <div id="register-page">
+        <section id="register-page">
             <h3>Rejestracja</h3>
             <form id="register-form" method="POST"
                 action="https://infinite-hamlet-29399.herokuapp.com/sender/register" enctype="multipart/form-data">
@@ -26,9 +25,8 @@
                     </li>
                     <li><input id="submit" type="submit" name="submit" value="Zarejestruj"/></li>
                 </ul>
-                
             </form>
-        </div>
+        </section>
     </body>
 </html>
 {% endblock %}

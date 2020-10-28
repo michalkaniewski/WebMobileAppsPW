@@ -1,9 +1,19 @@
-form ul { list-style-type: none }
-form ul li {margin-top: 10px;}
+form ul {
+    list-style-type: none;
+    padding-inline-end: 40px;
+}
+form ul li {
+    margin-top: 10px;
+}
 input {
     width: 100%;
     border-radius: 2px;
 }
+
+input.incorrect {
+    border-color: red;
+}
+
 select {
     width: 100%;
     border-radius: 2px;
@@ -11,17 +21,85 @@ select {
 input#submit {
     color: white;
     background-color: green;
+    font-size: larger;
 }
 form#register-form {
-    width: 50%;
-    margin-left: 25%;
+    width: 100%;
 }
-h3 {
+section#register-page h3 {
     text-align: center;
 }
-div#register-page {
+section#register-page {
+    margin-top: 10%;
+    width: 50%;
+    margin-left: 25%;
     background-color: lightblue;
+    padding-top: 5px;
+    padding-bottom: 10px;
 }
 body {
     margin: 0 0 0 0;
+}
+header {
+    background-color: lightsalmon;
+}
+header h1 {
+    text-align: center;
+    margin: 0 0 0 0;
+}
+header h2 {
+    text-align: center;
+    margin: 0 0 0 0;
+}
+nav.topnav {
+    overflow: hidden;
+    background-color: #333;
+}
+
+nav.topnav a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+nav.topnav a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+body {
+    background-color: lightyellow;
+}
+
+footer {
+    overflow: hidden;
+    background-color: #333;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+
+footer a {
+    float: right;
+    text-align: center;
+    color: #f2f2f2;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+footer a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+footer span {
+    color: #f2f2f2;
+    float: left;
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 17px;
 }
