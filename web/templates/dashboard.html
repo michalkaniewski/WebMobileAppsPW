@@ -1,8 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
+    <script type="text/javascript" src="../static/scripts/dashboard-data.js"></script>
 </head>
 <section class="home-page">
     Cześć {{session['username']}}
+</section>
+<section>
+    <table id="label-table">
+        <tr>
+            <th>Id</th>
+            <th>Nazwa</th>
+            <th>Adresat</th>
+            <th>Rozmiar paczki</th>
+            <th>Docelowa skrytka</th>
+            <th></th>
+        </tr>
+    </table>
 </section>
 {% endblock %}

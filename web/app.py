@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request, render_template, make_response, session, flash, url_for
 from flask_session import Session
 
+from uuid import uuid4
 from datetime import datetime
 
 from redis import Redis
@@ -28,6 +29,8 @@ def save_user(email, username, password):
     password = password.encode()
     hashed = hashpw(password, salt)
     db.hset(f"user:{username}", "password", hashed)
+    db.hset(f"user:{username}", "email", email)
+    
     return True
 
 def verify_user(username, password):
@@ -112,6 +115,32 @@ def show_dashboard():
         return redirect(url_for("login_form"))
     else:
         return render_template('dashboard.html')
+
+@app.route('/label', methods=["GET"])
+def get_labels():
+    return "hello"
+    # TODO: Body
+
+@app.route('/label', methods=["POST"])
+def add_label():
+    username = session.get("username")
+    if not username:
+        flash("Log in first!")
+        return redirect(url_for("login_form"))
+    creating_user = session['username']
+    id = str(uuid4())
+    name = request.form.get("name")
+    receiver = request.form.get("receiver")
+    size = request.form.get("size")
+    target = request.form.get("target")
+    db.sadd(f"user:{creating_user}:labels", id)
+    return "done"
+
+
+@app.route('/label/<label_id>', methods=["DELETE"])
+def delete_label(label_id):
+    return "hello"
+    # TODO: Body
 
 @app.route('/')
 def home():
