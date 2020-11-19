@@ -1,4 +1,4 @@
-const PL = 'ĄĆĘŁŃÓŚŹŻ';
+/*const PL = 'ĄĆĘŁŃÓŚŹŻ';
 const pl = 'ąćęłńóśźż';
 
 function setUpEvents() {
@@ -78,4 +78,4 @@ function validatePassword(e, password, rePassword) {
 
 window.onload = function() {
     setUpEvents();
-}
+}*/

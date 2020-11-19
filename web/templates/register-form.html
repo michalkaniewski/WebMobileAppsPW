@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<html>
+    <head>
+        <script type="text/javascript" src="../static/scripts/form-validation.js"></script>
+    </head>
+    <body>
+        <section id="register-page">
+            <h3>Rejestracja</h3>
+            <form id="register-form" method="POST"
+                action="/sender/register" enctype="multipart/form-data">
+                <ul>
+                    <li><input id="email" type="text" name="email" placeholder="e-mail" required/></li>
+                    <li><input id="login" type="text" name="username" placeholder="Nazwa użytkownika" required/></li>
+                    <li><input id="password" type="password" name="password" placeholder="Hasło" required/></li>
+                    <li><input id="repassword" type="password" name="password2" placeholder="Powtórne hasło" required/></li>
+                    <li><input id="submit" type="submit" name="submit" value="Zarejestruj"/></li>
+                </ul>
+            </form>
+        </section>
+    </body>
+</html>
+{% endblock %}

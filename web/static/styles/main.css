@@ -5,6 +5,19 @@ form ul {
 form ul li {
     margin-top: 10px;
 }
+
+ul.flashes {
+    list-style-type: none;
+    width: 50%;
+    margin-left: 25%;
+    padding-left: 0;
+}
+ul.flashes li {
+    background-color: orange;
+    width: 100%;
+    text-align: center;
+}
+
 input {
     width: 100%;
     border-radius: 2px;
@@ -37,6 +50,22 @@ section#register-page {
     padding-top: 5px;
     padding-bottom: 10px;
 }
+
+form#login-form {
+    width: 100%;
+}
+section#login-page h3 {
+    text-align: center;
+}
+section#login-page {
+    margin-top: 10%;
+    width: 50%;
+    margin-left: 25%;
+    background-color: lightblue;
+    padding-top: 5px;
+    padding-bottom: 10px;
+}
+
 body {
     margin: 0 0 0 0;
 }

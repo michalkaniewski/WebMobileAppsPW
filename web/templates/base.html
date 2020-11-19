@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../static/styles/main.css"></link>
+    </head>
+    <body>
+        <nav class="topnav">
+            <a href="/">Start</a>
+            
+            {% if session['username'] %}
+            <a href="/sender/dashboard">Kokpit</a>
+            <a href="/sender/logout">Wyloguj</a>
+            {% endif %}
+            {% if not session['username'] %}
+            <a href="/sender/register">Rejestracja</a>
+            <a href="/sender/login">Logowanie</a>
+            {% endif %}
+        </nav>
+        <header>
+            <h1>System obsługi paczek</h1>
+            <h2>Michał Kaniewski</h2>
+        </header>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+        <footer>
+            <a href="https://github.com/michalkaniewski/WebMobileAppsPW/tree/master">Repozytorium</a>
+            <span id="year">2020</span>
+        </footer>
+    </body>
+</html>
