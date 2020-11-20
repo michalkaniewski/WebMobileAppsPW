@@ -4,18 +4,31 @@
     <script type="text/javascript" src="../static/scripts/dashboard-data.js"></script>
 </head>
 <section class="home-page">
-    Cześć {{session['username']}}
+    <form id="label-form">
+        <input id="name" type="text" name="name" placeholder="Nazwa etykiety" required/>
+        <input id="receiver" type="text" name="receiver" placeholder="Adresat" required/>
+        <input id="size" type="text" name="size" placeholder="Rozmiar paczki" required/>
+        <input id="target" type="text" name="target" placeholder="Docelowa skrytka" required/>
+    </form>
+    <button id="add-button">Dodaj</button>
 </section>
+
 <section>
     <table id="label-table">
-        <tr>
-            <th>Id</th>
-            <th>Nazwa</th>
-            <th>Adresat</th>
-            <th>Rozmiar paczki</th>
-            <th>Docelowa skrytka</th>
-            <th></th>
-        </tr>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nazwa</th>
+                <th>Adresat</th>
+                <th>Rozmiar paczki</th>
+                <th>Docelowa skrytka</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="table-content">
+
+        </tbody>
     </table>
 </section>
+
 {% endblock %}

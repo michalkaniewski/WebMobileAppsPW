@@ -151,10 +151,10 @@ def add_label():
         return redirect(url_for("login_form"))
     creating_user = session['username']
     id = str(uuid4())
-    name = "w transporcie" #request.form.get("name")
-    receiver = "user2" #request.form.get("receiver")
-    size = "2kg" #request.form.get("size")
-    target = "WAW-1233" #request.form.get("target")
+    name = request.form.get("name")
+    receiver = request.form.get("receiver")
+    size = request.form.get("size")
+    target = request.form.get("target")
     db.hset(f"label:{id}", "name", name)
     db.hset(f"label:{id}", "receiver", receiver)
     db.hset(f"label:{id}", "size", size)
@@ -165,8 +165,14 @@ def add_label():
 
 @app.route('/label/<label_id>', methods=["DELETE"])
 def delete_label(label_id):
-    return "hello"
-    # TODO: Body
+    username = session.get("username")
+    if not username:
+        return "error"
+    if not db.sismember(f"user:{username}:labels", label_id):
+        return "error"
+    db.delete(f"label:{label_id}")
+    db.srem(f"user:{username}:labels", label_id)
+    return "done"
 
 @app.route('/')
 def home():
