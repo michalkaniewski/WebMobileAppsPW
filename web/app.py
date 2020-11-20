@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request, render_template, make_response, session, flash, url_for
 from flask_session import Session
+from flask import jsonify
 
 from uuid import uuid4
 from datetime import datetime
@@ -118,7 +119,28 @@ def show_dashboard():
 
 @app.route('/label', methods=["GET"])
 def get_labels():
-    return "hello"
+    username = session.get("username")
+    if not username:
+        flash("Log in first!")
+        return redirect(url_for("login_form"))
+    label_ids = db.smembers(f"user:{username}:labels")
+    label_ids = list(label_ids)
+    
+    for i, id in enumerate(label_ids):
+        label_ids[i] = id.decode('utf-8')
+    
+    labels = []
+    for id in label_ids:
+        label = {}
+        label['id'] = id
+        label['name'] = db.hget(f"label:{id}", "name").decode('utf-8')
+        label['receiver'] = db.hget(f"label:{id}", "receiver").decode('utf-8')
+        label['size'] = db.hget(f"label:{id}", "size").decode('utf-8')
+        label['target'] = db.hget(f"label:{id}", "target").decode('utf-8')
+        labels.append(label)
+    response_body = {}
+    response_body['labels'] = labels
+    return jsonify(response_body)
     # TODO: Body
 
 @app.route('/label', methods=["POST"])
@@ -129,10 +151,14 @@ def add_label():
         return redirect(url_for("login_form"))
     creating_user = session['username']
     id = str(uuid4())
-    name = request.form.get("name")
-    receiver = request.form.get("receiver")
-    size = request.form.get("size")
-    target = request.form.get("target")
+    name = "w transporcie" #request.form.get("name")
+    receiver = "user2" #request.form.get("receiver")
+    size = "2kg" #request.form.get("size")
+    target = "WAW-1233" #request.form.get("target")
+    db.hset(f"label:{id}", "name", name)
+    db.hset(f"label:{id}", "receiver", receiver)
+    db.hset(f"label:{id}", "size", size)
+    db.hset(f"label:{id}", "target", target)
     db.sadd(f"user:{creating_user}:labels", id)
     return "done"
 

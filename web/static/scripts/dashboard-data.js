@@ -6,11 +6,15 @@ function deleteLabel(e) {
 }
 
 function loadData() {
-    const labels = [
-        {id: "1234", name: "w transporcie", receiver: "user1", size: "20kg", target: "WAW-1323"},
-        {id: "2345", name: "w skrytce", receiver: "user2", size: "200g", target: "BIA-123"},
-        {id: "3456", name: "anulowana", receiver: "user3", size: "2kg", target: "KRA-2343"}
-    ];
+    let labels = [];
+    fetch('/label').then(res => {
+        res.json().then(obj => fillTable(obj['labels']));
+        
+    })
+    
+}
+
+function fillTable(labels) {
     labels.forEach(label => {
         const row = table.insertRow(-1);
         for (key in label) {
