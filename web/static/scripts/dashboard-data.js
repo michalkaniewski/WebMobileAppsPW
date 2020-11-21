@@ -1,5 +1,5 @@
 let tableContent;
-let form;
+let labelForm;
 let addButton;
 
 function deleteLabel(e) {
@@ -16,6 +16,7 @@ function addLabel(form) {
         body: fd
     }).then(res => {
         if (res.status === 201) {
+            
             loadData();
         }
     });
