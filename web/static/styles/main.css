@@ -51,13 +51,10 @@ input#submit {
     background-color: green;
     font-size: larger;
 }
-form#register-form {
-    width: 100%;
-}
-section#register-page h3 {
+section.form-section h3 {
     text-align: center;
 }
-section#register-page {
+section.form-section {
     margin-top: 10%;
     width: 50%;
     margin-left: 25%;
@@ -66,19 +63,39 @@ section#register-page {
     padding-bottom: 10px;
 }
 
-form#login-form {
-    width: 100%;
+section#dashboard-table {
+    padding-left: 10%;
+    padding-right: 10%;
 }
-section#login-page h3 {
+section#dashboard-table h3 {
     text-align: center;
 }
-section#login-page {
-    margin-top: 10%;
-    width: 50%;
-    margin-left: 25%;
-    background-color: lightblue;
-    padding-top: 5px;
-    padding-bottom: 10px;
+
+button.delete-button {
+    background-color: red;
+    color: white;
+    font-size: initial;
+    width: 100%;
+}
+
+section#dashboard-form {
+    margin-top: 10px;
+}
+
+section#dashboard-form ul {
+    list-style-type: none;
+    padding-inline-end: 40px;
+}
+
+section#dashboard-form button {
+    color: white;
+    background-color: green;
+    font-size: larger;
+    width: 100%;
+}
+
+section.form-section form {
+    width: 100%;
 }
 
 body {

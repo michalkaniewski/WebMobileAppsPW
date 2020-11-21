@@ -15,7 +15,7 @@ function addLabel(form) {
         method: 'POST',
         body: fd
     }).then(res => {
-        if (res.status === 200) {
+        if (res.status === 201) {
             loadData();
         }
     });
@@ -44,6 +44,7 @@ function fillTable(labels) {
         deleteButton.id = label['id'];
         deleteButton.onclick = e => deleteLabel(e);
         deleteButton.innerText = "Usuń";
+        deleteButton.classList.add("delete-button");
         var cell = document.createElement('td');
         cell.appendChild(deleteButton);
         row.appendChild(cell);

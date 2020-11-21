@@ -43,7 +43,7 @@ def verify_user(username, password):
     return checkpw(password, hashed)
 
 def error(msg, status=400):
-    response = make_response({"status":"error", "message":msg}, status)
+    return make_response({"status":"error", "message":msg}, status)
 
 def redirect(url, status=302):
     response = make_response('', status)
@@ -105,7 +105,7 @@ def login():
         return redirect(url_for('login_form'))
     flash(f"Welcome {username}!")
     session["username"] = username
-    session["logged-at"] = datetime.now()
+    session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     return redirect(url_for('home'))
 
 @app.route('/sender/dashboard', methods=["GET"])
@@ -121,8 +121,7 @@ def show_dashboard():
 def get_labels():
     username = session.get("username")
     if not username:
-        flash("Log in first!")
-        return redirect(url_for("login_form"))
+        return error("Log in to get labels", 401)
     label_ids = db.smembers(f"user:{username}:labels")
     label_ids = list(label_ids)
     
@@ -140,15 +139,14 @@ def get_labels():
         labels.append(label)
     response_body = {}
     response_body['labels'] = labels
-    return jsonify(response_body)
+    return jsonify(response_body), 200
     # TODO: Body
 
 @app.route('/label', methods=["POST"])
 def add_label():
     username = session.get("username")
     if not username:
-        flash("Log in first!")
-        return redirect(url_for("login_form"))
+        return error("Log in to add labels", 401)
     creating_user = session['username']
     id = str(uuid4())
     name = request.form.get("name")
@@ -160,19 +158,19 @@ def add_label():
     db.hset(f"label:{id}", "size", size)
     db.hset(f"label:{id}", "target", target)
     db.sadd(f"user:{creating_user}:labels", id)
-    return "done"
+    return "Label created", 201
 
 
 @app.route('/label/<label_id>', methods=["DELETE"])
 def delete_label(label_id):
     username = session.get("username")
     if not username:
-        return "error"
+        return error("Log in to delete labels", 401)
     if not db.sismember(f"user:{username}:labels", label_id):
-        return "error"
+        return error(f"No such label for user {username}", 403)
     db.delete(f"label:{label_id}")
     db.srem(f"user:{username}:labels", label_id)
-    return "done"
+    return "Label deleted correctly", 200
 
 @app.route('/')
 def home():

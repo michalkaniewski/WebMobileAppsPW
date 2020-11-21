@@ -3,17 +3,22 @@
 <head>
     <script type="text/javascript" src="../static/scripts/dashboard-data.js"></script>
 </head>
-<section class="home-page">
+<section class="form-section" id="dashboard-form">
     <form id="label-form">
-        <input id="name" type="text" name="name" placeholder="Nazwa etykiety" required/>
-        <input id="receiver" type="text" name="receiver" placeholder="Adresat" required/>
-        <input id="size" type="text" name="size" placeholder="Rozmiar paczki" required/>
-        <input id="target" type="text" name="target" placeholder="Docelowa skrytka" required/>
+        <ul>
+            <li><input id="name" type="text" name="name" placeholder="Nazwa etykiety" required/></li>
+            <li><input id="receiver" type="text" name="receiver" placeholder="Adresat" required/></li>
+            <li><input id="size" type="text" name="size" placeholder="Rozmiar paczki" required/></li>
+            <li><input id="target" type="text" name="target" placeholder="Docelowa skrytka" required/></li>
+        </ul>
     </form>
-    <button id="add-button">Dodaj</button>
+    <ul>
+        <li><button id="add-button">Dodaj</button></li>
+    </ul>
 </section>
 
-<section>
+<section id="dashboard-table">
+    <h3>Twoje etykiety</h3>
     <table id="label-table">
         <thead>
             <tr>
