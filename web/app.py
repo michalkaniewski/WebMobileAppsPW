@@ -58,29 +58,30 @@ def register_form():
 def register():
     username = request.form.get('username')
     if not username:
-        flash("No username provided")
+        flash("Nie podano nazwy użytkownika")
     
     email = request.form.get('email')
     if not email:
-        flash("No e-mail provided")
+        flash("Nie podano e-maila")
     
     password = request.form.get('password')
     if not password:
-        flash("No password provided")
+        flash("Nie podano hasła")
     
     password2 = request.form.get('password2')
     if password != password2:
-        flash("Password doesn't match")
+        flash("Podane hasła nie są zgodne")
         return redirect(url_for('register_form'))
     
     print(username, password, email)
     if username and email and password:
         if is_user(username):
-            flash(f"User {username} already registered")
+            flash(f"Login {username} jest zajęty")
             return redirect(url_for('register_form'))
         success = save_user(email, username, password)
         if not success:
-            flash("A problem occured while registering new user")
+            flash("Wystąpił problem przy rejestracji nowego użytkownika")
+            return redirect(url_for('register_form'))
         return redirect(url_for('login_form'))
 
 @app.route('/sender/logout', methods=['GET'])
@@ -98,12 +99,12 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
     if not username or not password:
-        flash("Missing username and/or password")
+        flash("Brak loginu/hasła")
         return redirect(url_for('login_form'))
     if not verify_user(username, password):
-        flash("Bad credentials")
+        flash("Nieprawidłowe dane logowania")
         return redirect(url_for('login_form'))
-    flash(f"Welcome {username}!")
+    flash(f"Witaj {username}!")
     session["username"] = username
     session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     return redirect(url_for('home'))
@@ -112,7 +113,7 @@ def login():
 def show_dashboard():
     username = session.get("username")
     if not username:
-        flash("Log in first!")
+        flash("Aby przejść dalej zaloguj się!")
         return redirect(url_for("login_form"))
     else:
         return render_template('dashboard.html')

@@ -16,7 +16,7 @@ function addLabel(form) {
         body: fd
     }).then(res => {
         if (res.status === 201) {
-            
+            form.reset();
             loadData();
         }
     });
