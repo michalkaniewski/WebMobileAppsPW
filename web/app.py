@@ -7,7 +7,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from redis import Redis
-db = Redis(host='redis', port=6379, db=0)
+
 
 from os import getenv
 from dotenv import load_dotenv
@@ -15,11 +15,11 @@ from dotenv import load_dotenv
 from bcrypt import hashpw, gensalt, checkpw
 
 load_dotenv()
+db = Redis(host=getenv("REDIS_HOST"), port=getenv("REDIS_PORT"), db=getenv("REDIS_NUM"), password=getenv("REDIS_PASS"))
 SESSION_TYPE='redis'
 SESSION_REDIS=db
 app = Flask(__name__)
 app.config.from_object(__name__)
-#app.secret_key = getenv('SECRET_KEY')
 ses = Session(app)
 
 def is_user(username):
