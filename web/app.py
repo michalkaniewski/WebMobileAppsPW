@@ -2,17 +2,20 @@ from flask import Flask
 from flask import request, render_template, make_response, session, flash, url_for
 from flask_session import Session
 from flask import jsonify
+import requests
 
 from uuid import uuid4
 from datetime import datetime
+from datetime import timedelta
 
 from redis import Redis
-
+import jwt
 
 from os import getenv
 from dotenv import load_dotenv
 
 from bcrypt import hashpw, gensalt, checkpw
+import logging
 
 load_dotenv()
 db = Redis(host=getenv("REDIS_HOST"), port=getenv("REDIS_PORT"), db=getenv("REDIS_NUM"), password=getenv("REDIS_PASS"))
@@ -21,6 +24,9 @@ SESSION_REDIS=db
 app = Flask(__name__)
 app.config.from_object(__name__)
 ses = Session(app)
+token = ""
+logging.basicConfig(level=logging.INFO)
+ws_host = getenv("WS_HOST")
 
 def is_user(username):
     return db.hexists(f"user:{username}", "password")
@@ -49,6 +55,14 @@ def redirect(url, status=302):
     response = make_response('', status)
     response.headers['Location'] = url
     return response
+
+def generate_jwt():
+    username = session.get("username")
+    if not username:
+        return ""
+    exp = datetime.utcnow() + timedelta(minutes=10)
+    token_bytes = jwt.encode({'username': username, 'usertype': 'sender', 'exp': exp}, getenv("JWT_SECRET"), algorithm='HS256')
+    return token_bytes.decode()
 
 @app.route('/sender/register')
 def register_form():
@@ -107,6 +121,11 @@ def login():
     flash(f"Witaj {username}!")
     session["username"] = username
     session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    token = generate_jwt()
+    #logging.info(token)
+    headers={}
+    headers["Authorization"] = f"Bearer {token}"
+    requests.get(f"{ws_host}/label", headers=headers)
     return redirect(url_for('home'))
 
 @app.route('/sender/dashboard', methods=["GET"])
@@ -141,7 +160,6 @@ def get_labels():
     response_body = {}
     response_body['labels'] = labels
     return jsonify(response_body), 200
-    # TODO: Body
 
 @app.route('/label', methods=["POST"])
 def add_label():

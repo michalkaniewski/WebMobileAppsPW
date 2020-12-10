@@ -5,6 +5,13 @@ services:
     ports:
       - "8000:8000"
     env_file: ./web/.env
+    depends_on:
+      - web-service
+  web-service:
+    build: web-service
+    ports:
+      - "8080:8080"
+    env_file: ./web-service/.env
     #depends_on:
     #  - redis
   #redis:
