@@ -1,8 +1,7 @@
 Flask
-Flask-Session
+flask_hal
 gunicorn
 python-dotenv
 redis
 bcrypt
 pyjwt
-requests
