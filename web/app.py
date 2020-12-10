@@ -24,7 +24,6 @@ SESSION_REDIS=db
 app = Flask(__name__)
 app.config.from_object(__name__)
 ses = Session(app)
-token = ""
 logging.basicConfig(level=logging.INFO)
 ws_host = getenv("WS_HOST")
 
@@ -122,10 +121,7 @@ def login():
     session["username"] = username
     session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     token = generate_jwt()
-    #logging.info(token)
-    headers={}
-    headers["Authorization"] = f"Bearer {token}"
-    requests.get(f"{ws_host}/label", headers=headers)
+    logging.info(f"LOGGED IN, token {token}")
     return redirect(url_for('home'))
 
 @app.route('/sender/dashboard', methods=["GET"])
@@ -142,42 +138,22 @@ def get_labels():
     username = session.get("username")
     if not username:
         return error("Log in to get labels", 401)
-    label_ids = db.smembers(f"user:{username}:labels")
-    label_ids = list(label_ids)
-    
-    for i, id in enumerate(label_ids):
-        label_ids[i] = id.decode('utf-8')
-    
-    labels = []
-    for id in label_ids:
-        label = {}
-        label['id'] = id
-        label['name'] = db.hget(f"label:{id}", "name").decode('utf-8')
-        label['receiver'] = db.hget(f"label:{id}", "receiver").decode('utf-8')
-        label['size'] = db.hget(f"label:{id}", "size").decode('utf-8')
-        label['target'] = db.hget(f"label:{id}", "target").decode('utf-8')
-        labels.append(label)
-    response_body = {}
-    response_body['labels'] = labels
-    return jsonify(response_body), 200
+    headers={}
+    token = generate_jwt()
+    headers["Authorization"] = f"Bearer {token}"
+    res = requests.get(f"{ws_host}/sender/label", headers=headers)
+    return res.json(), res.status_code
 
 @app.route('/label', methods=["POST"])
 def add_label():
     username = session.get("username")
     if not username:
         return error("Log in to add labels", 401)
-    creating_user = session['username']
-    id = str(uuid4())
-    name = request.form.get("name")
-    receiver = request.form.get("receiver")
-    size = request.form.get("size")
-    target = request.form.get("target")
-    db.hset(f"label:{id}", "name", name)
-    db.hset(f"label:{id}", "receiver", receiver)
-    db.hset(f"label:{id}", "size", size)
-    db.hset(f"label:{id}", "target", target)
-    db.sadd(f"user:{creating_user}:labels", id)
-    return "Label created", 201
+    headers={}
+    token = generate_jwt()
+    headers["Authorization"] = f"Bearer {token}"
+    res = requests.post(f"{ws_host}/sender/label", headers=headers, data=request.form)
+    return res.text, res.status_code
 
 
 @app.route('/label/<label_id>', methods=["DELETE"])
@@ -185,11 +161,11 @@ def delete_label(label_id):
     username = session.get("username")
     if not username:
         return error("Log in to delete labels", 401)
-    if not db.sismember(f"user:{username}:labels", label_id):
-        return error(f"No such label for user {username}", 403)
-    db.delete(f"label:{label_id}")
-    db.srem(f"user:{username}:labels", label_id)
-    return "Label deleted correctly", 200
+    headers={}
+    token = generate_jwt()
+    headers["Authorization"] = f"Bearer {token}"
+    res = requests.delete(f"{ws_host}/sender/label/{label_id}", headers=headers)
+    return res.text, res.status_code
 
 @app.route('/')
 def home():
