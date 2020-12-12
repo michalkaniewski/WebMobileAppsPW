@@ -122,7 +122,10 @@ def add_label():
     db.hset(f"label:{id}", "target", target)
     db.hset(f"label:{id}", "picked", "false")
     db.sadd(f"user:{username}:labels", id)
-    return id, 201
+    links = []
+    links.append(Link('label:delete', f'/sender/label/{id}'))
+    document = Document(data={"message": id}, links=links)
+    return document.to_json(), 201
 
 @app.route('/sender/label/<label_id>', methods=["DELETE"])
 def delete_label(label_id):
@@ -140,7 +143,8 @@ def delete_label(label_id):
     logging.info(f"label:{label_id}")
     db.delete(f"label:{label_id}")
     db.srem(f"user:{username}:labels", label_id)
-    return label_id, 200
+    document = Document(data={"message": label_id}, links=[])
+    return document.to_json(), 200
 
 @app.route('/sender', methods=["GET"])
 def sender():
