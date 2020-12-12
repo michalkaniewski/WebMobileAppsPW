@@ -24,12 +24,12 @@ function addLabel(form) {
 
 function loadData() {
     fetch('/label').then(res => {
-        res.json().then(obj => fillTable(obj['labels']));
+        res.json().then(obj => fillTable(obj['labels'], obj['_links']));
     })
     
 }
 
-function fillTable(labels) {
+function fillTable(labels, links) {
     while(tableContent.children.length > 0) {
         tableContent.deleteRow(0);
     }
@@ -41,13 +41,25 @@ function fillTable(labels) {
             cell.appendChild(document.createTextNode(label[key]));
             row.appendChild(cell);
         }
-        var deleteButton = document.createElement('button');
-        deleteButton.id = label['id'];
-        deleteButton.onclick = e => deleteLabel(e);
-        deleteButton.innerText = "Usuń";
-        deleteButton.classList.add("delete-button");
-        var cell = document.createElement('td');
-        cell.appendChild(deleteButton);
+        let deletable = false;
+        for (var key in links) {
+            if (links[key]["href"].includes(label["id"])) {
+                deletable = true;
+                break;
+            }
+        }
+        if (deletable === true) {
+            var deleteButton = document.createElement('button');
+            deleteButton.id = label['id'];
+            deleteButton.onclick = e => deleteLabel(e);
+            deleteButton.innerText = "Usuń";
+            deleteButton.classList.add("delete-button");
+            var cell = document.createElement('td');
+            cell.appendChild(deleteButton);
+        } else {
+            var cell = document.createElement('td');
+            cell.appendChild(document.createTextNode("Odebrana"));
+        }
         row.appendChild(cell);
     });
 }
