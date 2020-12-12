@@ -30,6 +30,41 @@ def before_request_func():
         g.authorization = {}
     logging.info(g.authorization)
 
+@app.route('/courier/label', methods=["GET"])
+def list_labels():
+    label_ids = db.keys("label:*")
+    for i, id in enumerate(label_ids):
+        logging.info(id)
+        label_ids[i] = id.decode('utf-8')
+    links=[]
+    labels = []
+    for id in label_ids:
+        logging.info(db.hgetall(id))
+        label = {}
+        label['id'] = id.split(":")[1]
+        label['name'] = db.hget(id, 'name').decode('utf-8')
+        label['receiver'] = db.hget(id, 'receiver').decode('utf-8')
+        label['size'] = db.hget(id, 'size').decode('utf-8')
+        label['target'] = db.hget(id, 'target').decode('utf-8')
+        labels.append(label)
+        if db.hget(id, "picked").decode('utf-8') == "false":
+            links.append(Link(f"label:{label['name']}:pick", f"/courier/label/{label['id']}"))
+    response_body = {}
+    response_body['labels'] = labels
+    document = Document(data=response_body, links=links)
+    return document.to_json(), 200
+
+@app.route('/courier/label/<label_id>', methods=["PUT"])
+def pick_label(label_id):
+    if len(db.keys(f"label:{label_id}")) == 0:
+        return error(f"Cannot find label of id: {label_id}", 400)
+    if db.hget(f"label:{label_id}", "picked").decode('utf-8') == "true":
+        return error("Already picked", 400)
+    db.hset(f"label:{label_id}", "picked", "true")
+    links = []
+    document = Document(data={}, links=links)
+    return document.to_json(), 200
+
 @app.route('/sender/label', methods=["GET"])
 def get_labels():
     username = g.authorization.get("username")
@@ -43,7 +78,7 @@ def get_labels():
     
     for i, id in enumerate(label_ids):
         label_ids[i] = id.decode('utf-8')
-    
+    links=[]
     labels = []
     for id in label_ids:
         label = {}
@@ -53,9 +88,12 @@ def get_labels():
         label['size'] = db.hget(f"label:{id}", "size").decode('utf-8')
         label['target'] = db.hget(f"label:{id}", "target").decode('utf-8')
         labels.append(label)
+        if db.hget(f"label:{id}", "picked").decode('utf-8') == "false":
+            links.append(Link(f"label:{label['id']}:delete", f"/sender/label/{id}"))
     response_body = {}
     response_body['labels'] = labels
-    return jsonify(response_body), 200
+    document = Document(data=response_body, links=links)
+    return document.to_json(), 200
 
 @app.route('/sender/label', methods=["POST"])
 def add_label():
@@ -70,12 +108,21 @@ def add_label():
     receiver = request.form.get("receiver")
     size = request.form.get("size")
     target = request.form.get("target")
+    if not name:
+        return error("No value of name", 400)
+    if not receiver:
+        return error("No value of receiver", 400)
+    if not size:
+        return error("No value of size", 400)
+    if not target:
+        return error("No value of target", 400)
     db.hset(f"label:{id}", "name", name)
     db.hset(f"label:{id}", "receiver", receiver)
     db.hset(f"label:{id}", "size", size)
     db.hset(f"label:{id}", "target", target)
+    db.hset(f"label:{id}", "picked", "false")
     db.sadd(f"user:{username}:labels", id)
-    return "Label created", 201
+    return id, 201
 
 @app.route('/sender/label/<label_id>', methods=["DELETE"])
 def delete_label(label_id):
@@ -88,9 +135,34 @@ def delete_label(label_id):
 
     if not db.sismember(f"user:{username}:labels", label_id):
         return error(f"No such label for user {username}", 403)
+    if db.hget(f"label:{label_id}", "picked").decode('utf-8') == "true":
+        return error("Cannot remove picked label", 403)
+    logging.info(f"label:{label_id}")
     db.delete(f"label:{label_id}")
     db.srem(f"user:{username}:labels", label_id)
-    return "Label deleted correctly", 200
+    return label_id, 200
+
+@app.route('/sender', methods=["GET"])
+def sender():
+    links = []
+    links.append(Link('label', '/sender/label'))
+    document = Document(data={}, links=links)
+    return document.to_json(), 200
+
+@app.route('/courier', methods=["GET"])
+def courier():
+    links = []
+    links.append(Link('label', '/courier/label'))
+    document = Document(data={}, links=links)
+    return document.to_json(), 200
+
+@app.route('/', methods=["GET"])
+def info():
+    links = []
+    links.append(Link('sender', '/sender'))
+    links.append(Link('courier', '/courier'))
+    document = Document(data={}, links=links)
+    return document.to_json(), 200
 
 def error(msg, status=400):
     return make_response({"status":"error", "message":msg}, status)
