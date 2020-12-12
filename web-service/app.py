@@ -23,23 +23,21 @@ logging.basicConfig(level=logging.INFO)
 @app.before_request
 def before_request_func():
     token = request.headers.get('Authorization','').replace('Bearer ','')
-    logging.info(token)
     try:
         g.authorization = decode(token, JWT_SECRET, algorithms=['HS256'])
-    except Exception:
+        logging.info("Authorized: " + g.authorization.get("username"))
+    except Exception as e:
         g.authorization = {}
-    logging.info(g.authorization)
+        logging.info("Unauthorized: " + str(e))
 
 @app.route('/courier/label', methods=["GET"])
 def list_labels():
     label_ids = db.keys("label:*")
     for i, id in enumerate(label_ids):
-        logging.info(id)
         label_ids[i] = id.decode('utf-8')
     links=[]
     labels = []
     for id in label_ids:
-        logging.info(db.hgetall(id))
         label = {}
         label['id'] = id.split(":")[1]
         label['name'] = db.hget(id, 'name').decode('utf-8')
@@ -140,7 +138,6 @@ def delete_label(label_id):
         return error(f"No such label for user {username}", 403)
     if db.hget(f"label:{label_id}", "picked").decode('utf-8') == "true":
         return error("Cannot remove picked label", 403)
-    logging.info(f"label:{label_id}")
     db.delete(f"label:{label_id}")
     db.srem(f"user:{username}:labels", label_id)
     document = Document(data={"message": label_id}, links=[])
