@@ -20,9 +20,3 @@ services:
     ports:
       - "8080:8080"
     env_file: ./web-service/.env
-    #depends_on:
-    #  - redis
-  #redis:
-  #  image: redis:alpine
-  #  ports:
-  #    - "6379:6379"

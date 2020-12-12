@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 ses = Session(app)
 logging.basicConfig(level=logging.INFO)
-ws_host = getenv("WS_HEROKU")
+ws_host = getenv("WS_HOST")
 
 def is_user(username):
     return db.hexists(f"user:{username}", "password")
