@@ -32,6 +32,12 @@ def before_request_func():
 
 @app.route('/courier/label', methods=["GET"])
 def list_labels():
+    username = g.authorization.get("username")
+    usertype = g.authorization.get("usertype")
+    if not username:
+        return error("Log in to get labels list", 401)
+    if usertype != "courier":
+        return error("Resource available only for couriers", 401)
     label_ids = db.keys("label:*")
     for i, id in enumerate(label_ids):
         label_ids[i] = id.decode('utf-8')
@@ -46,21 +52,80 @@ def list_labels():
         label['target'] = db.hget(id, 'target').decode('utf-8')
         labels.append(label)
         if db.hget(id, "picked").decode('utf-8') == "false":
-            links.append(Link(f"label:{label['name']}:pick", f"/courier/label/{label['id']}"))
+            links.append(Link(f"label:{label['name']}:pick", f"/courier/package/{label['id']}"))
     response_body = {}
     response_body['labels'] = labels
     document = Document(data=response_body, links=links)
     return document.to_json(), 200
 
-@app.route('/courier/label/<label_id>', methods=["PUT"])
-def pick_label(label_id):
+@app.route('/courier/package', methods=["GET"])
+def get_packages():
+    username = g.authorization.get("username")
+    usertype = g.authorization.get("usertype")
+    if not username:
+        return error("Log in to get packages", 401)
+    if usertype != "courier":
+        return error("Resource available only for couriers", 401)
+    package_ids = db.smembers(f"courier:{username}:packages")
+    package_ids = list(package_ids)
+    
+    for i, id in enumerate(package_ids):
+        package_ids[i] = id.decode('utf-8')
+    links=[]
+    packages = []
+    for id in package_ids:
+        package = {}
+        package['id'] = id
+        label_id = db.hget(f"package:{id}", "label_id").decode('utf-8')
+        package['status'] = db.hget(f"package:{id}", "status").decode('utf-8')
+        package['name'] = db.hget(f"label:{label_id}", "name").decode('utf-8')
+        package['receiver'] = db.hget(f"label:{label_id}", "receiver").decode('utf-8')
+        package['size'] = db.hget(f"label:{label_id}", "size").decode('utf-8')
+        package['target'] = db.hget(f"label:{label_id}", "target").decode('utf-8')
+        packages.append(package)
+        links.append(Link(f"package:{package['name']}:changestatus", f"/courier/package/{package['id']}"))
+    response_body = {}
+    response_body['packages'] = packages
+    document = Document(data=response_body, links=links)
+    return document.to_json(), 200
+    
+@app.route('/courier/package/<label_id>', methods=["POST"])
+def create_package(label_id):
+    username = g.authorization.get("username")
+    usertype = g.authorization.get("usertype")
+    if not username:
+        return error("Log in to add package", 401)
+    if usertype != "courier":
+        return error("Resource available only for couriers", 401)
     if len(db.keys(f"label:{label_id}")) == 0:
         return error(f"Cannot find label of id: {label_id}", 400)
     if db.hget(f"label:{label_id}", "picked").decode('utf-8') == "true":
-        return error("Already picked", 400)
+        return error("Already created", 400)
     db.hset(f"label:{label_id}", "picked", "true")
+    id = str(uuid4())
+    db.hset(f"package:{id}", "label_id", label_id)
+    db.hset(f"package:{id}", "status", "odebrana")
+    db.sadd(f"courier:{username}:packages", id)
     links = []
-    document = Document(data={}, links=links)
+    links.append(Link('package:changestatus', f'/courier/package/{id}'))
+    document = Document(data={"message": id}, links=links)
+    return document.to_json(), 201
+
+@app.route('/courier/package/<package_id>', methods=["PUT"])
+def change_status(package_id):
+    username = g.authorization.get("username")
+    usertype = g.authorization.get("usertype")
+    if not username:
+        return error("Log in to add package", 401)
+    if usertype != "courier":
+        return error("Resource available only for couriers", 401)
+    allowed_status = ["ODEBRANA", "W DRODZE", "DOSTARCZONA"]
+    new_status = request.args.get('status')
+    if not new_status in allowed_status:
+        return error(f"Not allowed status: {new_status}", 400)
+    db.hset(f"package:{package_id}", "status", new_status)
+    links = []
+    document = Document(data={"message": f"Status changed into {new_status}"}, links=links)
     return document.to_json(), 200
 
 @app.route('/sender/label', methods=["GET"])
@@ -154,6 +219,7 @@ def sender():
 def courier():
     links = []
     links.append(Link('label', '/courier/label'))
+    links.append(Link('label', '/courier/package'))
     document = Document(data={}, links=links)
     return document.to_json(), 200
 
