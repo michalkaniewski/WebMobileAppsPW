@@ -104,7 +104,7 @@ def create_package(label_id):
     db.hset(f"label:{label_id}", "picked", "true")
     id = str(uuid4())
     db.hset(f"package:{id}", "label_id", label_id)
-    db.hset(f"package:{id}", "status", "odebrana")
+    db.hset(f"package:{id}", "status", "ODEBRANA")
     db.sadd(f"courier:{username}:packages", id)
     links = []
     links.append(Link('package:changestatus', f'/courier/package/{id}'))
