@@ -116,7 +116,7 @@ def change_status(package_id):
     username = g.authorization.get("username")
     usertype = g.authorization.get("usertype")
     if not username:
-        return error("Log in to add package", 401)
+        return error("Log in to change package status", 401)
     if usertype != "courier":
         return error("Resource available only for couriers", 401)
     allowed_status = ["ODEBRANA", "W DRODZE", "DOSTARCZONA"]
