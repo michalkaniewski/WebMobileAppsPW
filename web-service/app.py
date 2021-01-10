@@ -131,7 +131,6 @@ def change_status(package_id):
     links = []
     document = Document(data={"message": f"Status changed into {new_status}"}, links=links)
     db.hset(f"notification:{label_id}", "new_status", new_status)
-    logging.info(str(db.hget(f"notification:{label_id}", "new_status")))
     return document.to_json(), 200
 
 @app.route('/sender/notification', methods=["GET"])
@@ -151,7 +150,6 @@ def get_all_notifications():
     for id in label_ids:
         if db.exists(f"notification:{id}"):
             notification = {}
-            logging.info(db.hget(f"notification:{id}", "new_status"))
             notification['new_status'] = db.hget(f"notification:{id}", "new_status").decode('utf-8')
             notification['label'] = db.hget(f"label:{id}", "name").decode('utf-8')
             notifications.append(notification)

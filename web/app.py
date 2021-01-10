@@ -84,8 +84,6 @@ def generate_jwt():
         return ""
     exp = datetime.utcnow() + timedelta(minutes=10)
     token_bytes = jwt.encode({'username': username, 'usertype': 'sender', 'exp': exp}, getenv("JWT_SECRET"), algorithm='HS256')
-    logging.info(token_bytes)
-    logging.info(type(token_bytes))
     return token_bytes #.decode()
 
 @app.route('/callback')
@@ -164,7 +162,6 @@ def login():
     session["username"] = username
     session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     token = generate_jwt()
-    logging.info(f"LOGGED IN, token {token}")
     return redirect(url_for('home'))
 
 @app.route('/sender/dashboard', methods=["GET"])
@@ -230,8 +227,6 @@ def get_notifications():
     res = requests.get(f"{ws_host}/sender/notification", headers=headers)
     if res.status_code != 200:
         return res.text, res.status_code
-    logging.info(res)
-    logging.info(res.json())
     return res.json(), res.status_code
 
 
