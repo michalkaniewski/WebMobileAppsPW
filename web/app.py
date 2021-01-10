@@ -210,6 +210,31 @@ def delete_label(label_id):
     res = requests.delete(f"{ws_host}/sender/label/{label_id}", headers=headers)
     return res.text, res.status_code
 
+@app.route('/sender/notifications', methods=["GET"])
+def notifications_page():
+    username = session.get("username")
+    if not username:
+        flash("Aby przejść dalej zaloguj się!")
+        return redirect(url_for("login_form"))
+    else:
+        return render_template('notifications.html')
+
+@app.route('/notification', methods=["GET"])
+def get_notifications():
+    username = session.get("username")
+    if not username:
+        return error("Log in to get notifications", 401)
+    headers={}
+    token = generate_jwt()
+    headers["Authorization"] = f"Bearer {token}"
+    res = requests.get(f"{ws_host}/sender/notification", headers=headers)
+    if res.status_code != 200:
+        return res.text, res.status_code
+    logging.info(res)
+    logging.info(res.json())
+    return res.json(), res.status_code
+
+
 @app.route('/')
 def home():
     return render_template("home.html")

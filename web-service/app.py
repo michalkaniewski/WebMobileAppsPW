@@ -110,6 +110,7 @@ def create_package(label_id):
     links.append(Link('package:changestatus', f'/courier/package/{id}'))
     document = Document(data={"message": id}, links=links)
     db.hset(f"notification:{label_id}", "new_status", "ODEBRANA")
+    
     return document.to_json(), 201
 
 @app.route('/courier/package/<package_id>', methods=["PUT"])
@@ -126,9 +127,11 @@ def change_status(package_id):
         return error(f"Not allowed status: {new_status}", 400)
     db.hset(f"package:{package_id}", "status", new_status)
     label_id = db.hget(f"package:{package_id}", "label_id")
+    label_id = label_id.decode('utf-8')
     links = []
     document = Document(data={"message": f"Status changed into {new_status}"}, links=links)
     db.hset(f"notification:{label_id}", "new_status", new_status)
+    logging.info(str(db.hget(f"notification:{label_id}", "new_status")))
     return document.to_json(), 200
 
 @app.route('/sender/notification', methods=["GET"])
@@ -148,9 +151,11 @@ def get_all_notifications():
     for id in label_ids:
         if db.exists(f"notification:{id}"):
             notification = {}
-            notification['new_state'] = db.hget(f"notification:{id}", "new_state")
+            logging.info(db.hget(f"notification:{id}", "new_status"))
+            notification['new_status'] = db.hget(f"notification:{id}", "new_status").decode('utf-8')
             notification['label'] = db.hget(f"label:{id}", "name").decode('utf-8')
             notifications.append(notification)
+            db.delete(f"notification:{id}")
     response_body = {}
     response_body['notifications'] = notifications
     document = Document(data=response_body, links=[])
