@@ -6,3 +6,5 @@ redis
 bcrypt
 pyjwt
 requests
+authlib>=0.14.1
+six

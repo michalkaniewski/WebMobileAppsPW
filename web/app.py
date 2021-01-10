@@ -3,6 +3,7 @@ from flask import request, render_template, make_response, session, flash, url_f
 from flask_session import Session
 from flask import jsonify
 import requests
+from six.moves.urllib.parse import urlencode
 
 from uuid import uuid4
 from datetime import datetime
@@ -17,6 +18,8 @@ from dotenv import load_dotenv
 from bcrypt import hashpw, gensalt, checkpw
 import logging
 
+from authlib.integrations.flask_client import OAuth
+
 load_dotenv()
 db = Redis(host=getenv("REDIS_HOST"), port=getenv("REDIS_PORT"), db=getenv("REDIS_NUM"), password=getenv("REDIS_PASS"))
 SESSION_TYPE='redis'
@@ -26,6 +29,26 @@ app.config.from_object(__name__)
 ses = Session(app)
 logging.basicConfig(level=logging.INFO)
 ws_host = getenv("WS_HOST")
+
+AUTH0_CALLBACK_URL = getenv("AUTH0_CALLBACK_URL")
+AUTH0_CLIENT_ID = getenv("AUTH0_CLIENT_ID")
+AUTH0_CLIENT_SECRET = getenv("AUTH0_CLIENT_SECRET")
+AUTH0_DOMAIN = getenv("AUTH0_DOMAIN")
+AUTH0_BASE_URL = 'https://' + AUTH0_DOMAIN
+AUTH0_AUDIENCE = getenv("AUTH0_AUDIENCE")
+oauth = OAuth(app)
+
+auth0 = oauth.register(
+    'auth0',
+    client_id=AUTH0_CLIENT_ID,
+    client_secret=AUTH0_CLIENT_SECRET,
+    api_base_url=AUTH0_BASE_URL,
+    access_token_url=AUTH0_BASE_URL + '/oauth/token',
+    authorize_url=AUTH0_BASE_URL + '/authorize',
+    client_kwargs={
+        'scope': 'openid profile email',
+    },
+)
 
 def is_user(username):
     return db.hexists(f"user:{username}", "password")
@@ -61,7 +84,25 @@ def generate_jwt():
         return ""
     exp = datetime.utcnow() + timedelta(minutes=10)
     token_bytes = jwt.encode({'username': username, 'usertype': 'sender', 'exp': exp}, getenv("JWT_SECRET"), algorithm='HS256')
-    return token_bytes.decode()
+    logging.info(token_bytes)
+    logging.info(type(token_bytes))
+    return token_bytes #.decode()
+
+@app.route('/callback')
+def callback_handling():
+    auth0.authorize_access_token()
+    resp = auth0.get('userinfo')
+    userinfo = resp.json()
+
+    flash(f"Witaj {userinfo['name']}!")
+    session["username"] = userinfo['name']
+    session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    token = generate_jwt()
+    return redirect(url_for('home'))
+@app.route('/login')
+def login_oauth():
+    return auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL, audience=AUTH0_AUDIENCE)
+
 
 @app.route('/sender/register')
 def register_form():
@@ -101,7 +142,9 @@ def register():
 def logout():
     session.clear()
     flash("Wylogowano pomyślnie")
-    return redirect(url_for('login_form'))
+    params = {'returnTo': url_for('login_form', _external=True), 'client_id': AUTH0_CLIENT_ID}
+    return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
+    #return redirect(url_for('login_form'))
 
 @app.route('/sender/login', methods=['GET'])
 def login_form():

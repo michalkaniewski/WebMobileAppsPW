@@ -109,6 +109,7 @@ def create_package(label_id):
     links = []
     links.append(Link('package:changestatus', f'/courier/package/{id}'))
     document = Document(data={"message": id}, links=links)
+    db.hset(f"notification:{label_id}", "new_status", "ODEBRANA")
     return document.to_json(), 201
 
 @app.route('/courier/package/<package_id>', methods=["PUT"])
@@ -124,9 +125,37 @@ def change_status(package_id):
     if not new_status in allowed_status:
         return error(f"Not allowed status: {new_status}", 400)
     db.hset(f"package:{package_id}", "status", new_status)
+    label_id = db.hget(f"package:{package_id}", "label_id")
     links = []
     document = Document(data={"message": f"Status changed into {new_status}"}, links=links)
+    db.hset(f"notification:{label_id}", "new_status", new_status)
     return document.to_json(), 200
+
+@app.route('/sender/notification', methods=["GET"])
+def get_all_notifications():
+    username = g.authorization.get("username")
+    usertype = g.authorization.get("usertype")
+    if not username:
+        return error("Log in to get notifications", 401)
+    if usertype != "sender":
+        return error("Resource available only for senders", 401)
+    label_ids = db.smembers(f"user:{username}:labels")
+    label_ids = list(label_ids)
+    
+    for i, id in enumerate(label_ids):
+        label_ids[i] = id.decode('utf-8')
+    notifications = []
+    for id in label_ids:
+        if db.exists(f"notification:{id}"):
+            notification = {}
+            notification['new_state'] = db.hget(f"notification:{id}", "new_state")
+            notification['label'] = db.hget(f"label:{id}", "name").decode('utf-8')
+            notifications.append(notification)
+    response_body = {}
+    response_body['notifications'] = notifications
+    document = Document(data=response_body, links=[])
+    return document.to_json(), 200
+    
 
 @app.route('/sender/label', methods=["GET"])
 def get_labels():
